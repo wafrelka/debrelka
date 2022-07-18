@@ -30,6 +30,16 @@ pub struct GetRecordsParams {
     to: Option<u64>,
 }
 
+pub fn filter_records(records: &RecordSet, from: Option<u64>, to: Option<u64>) -> &[Record] {
+
+    let from = from.unwrap_or(0);
+    let to = to.unwrap_or(u64::MAX);
+
+    let i = records.partition_point(|r| r.timestamp < from);
+    let j = records.partition_point(|r| r.timestamp <= to);
+    &records[i..j]
+}
+
 pub async fn get_records(
     params: Query<GetRecordsParams>,
     if_none_match: Option<TypedHeader<IfNoneMatch>>,
@@ -45,12 +55,7 @@ pub async fn get_records(
         }
     }
 
-    let from = params.from.unwrap_or(0);
-    let to = params.to.unwrap_or(u64::MAX);
-
-    let i = state.records.partition_point(|r| r.timestamp < from);
-    let j = state.records.partition_point(|r| r.timestamp <= to);
-    let records: Vec<Record> = state.records[i..j].into();
+    let records: Vec<Record> = filter_records(&state.records, params.from, params.to).into();
     (TypedHeader(etag), Ok(records.into()))
 }
 
