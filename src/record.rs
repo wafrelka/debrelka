@@ -27,3 +27,32 @@ impl Deref for RecordSet {
         &self.sorted_records
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_record_set() {
+
+        let unsorted = [
+            Record{timestamp: 1, value: 1.0},
+            Record{timestamp: 4, value: 4.0},
+            Record{timestamp: 2, value: 2.0},
+            Record{timestamp: 5, value: 5.0},
+            Record{timestamp: 3, value: 3.0},
+        ];
+
+        let expected = [
+            Record{timestamp: 1, value: 1.0},
+            Record{timestamp: 2, value: 2.0},
+            Record{timestamp: 3, value: 3.0},
+            Record{timestamp: 4, value: 4.0},
+            Record{timestamp: 5, value: 5.0},
+        ];
+        let actual: RecordSet = unsorted.into_iter().collect();
+
+        assert_eq!(expected.as_slice(), actual.deref());
+    }
+}

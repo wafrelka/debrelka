@@ -65,3 +65,31 @@ pub fn create_router(state: SharedServerState) -> Router {
         .layer(CompressionLayer::new())
         .layer(Extension(state))
 }
+
+#[cfg(test)]
+mod test {
+
+    use crate::record::Record;
+    use super::*;
+
+    #[test]
+    fn test_filter_records() {
+
+        let records: RecordSet = [
+            Record{timestamp: 1, value: 1.0},
+            Record{timestamp: 2, value: 2.0},
+            Record{timestamp: 3, value: 3.0},
+            Record{timestamp: 4, value: 4.0},
+            Record{timestamp: 5, value: 5.0},
+        ].into_iter().collect();
+
+        let expected = [
+            Record{timestamp: 2, value: 2.0},
+            Record{timestamp: 3, value: 3.0},
+            Record{timestamp: 4, value: 4.0},
+        ];
+        let actual = filter_records(&records, Some(2), Some(4));
+
+        assert_eq!(expected, actual);
+    }
+}
